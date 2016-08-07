@@ -16,14 +16,13 @@ impl<'a> Client<'a> {
             let upstream = UdpSocket::bind(("127.0.0.1", PORT))
                 .expect("Failed to connect to Socket!");
 
-            let buf = b"Hallo Welt";
+            let buf = b"Hallo Welt you bastard";
             upstream.send_to(buf, (self.saddr, ::server::PORT)).expect("Couldn't send to");
 
-            let mut buf = vec![0u8; buf.len()];
-            println!("{:?}", buf);
+            let mut buf = [0u8; ::server::RECV_SIZE];
             upstream.recv_from(&mut buf).expect("Couldn't receive from");
-            let r = String::from_utf8(buf).expect("didn't receive valid utf8");
-            println!("recv: {}", r);
+            let r = buf.into_iter().filter(|&x| *x != 0).map(|x| *x).collect::<Vec<u8>>();
+            println!("recv: {:?}", String::from_utf8_lossy(&r).into_owned());
 
             self.upstream = Some(upstream);
             r

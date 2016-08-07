@@ -75,7 +75,6 @@ impl<'a> Client<'a> {
             }
         }
     }
-    #[allow(dead_code)]
     fn trim(data: &[u8]) -> (usize, usize) {
         let mut start = 0;
         let mut end = data.len();

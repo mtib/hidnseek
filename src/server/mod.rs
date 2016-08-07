@@ -1,5 +1,9 @@
 #![allow(dead_code)]
+mod player;
+
 use std::net::UdpSocket;
+use std::collections::HashMap;
+use ::server::player::Player;
 
 const ADDR: &'static str = "0.0.0.0";
 pub const PORT: u16 = 3377;
@@ -11,7 +15,8 @@ pub struct Server {
     cur_players: usize,
     name: String,
     width: usize,
-    height: usize
+    height: usize,
+    players: HashMap<Vec<(String, u16)>, Player>
 }
 
 /*
@@ -28,10 +33,12 @@ impl Server {
             cur_players: 0,
             name: String::from("Default Server Name"),
             width: 4,
-            height: 4
+            height: 4,
+            players: HashMap::new()
         }
     }
     pub fn start(&mut self) {
+        println!("starting server");
         let socket = UdpSocket::bind((ADDR, PORT))
             .expect("Cound not create server socket!");
 

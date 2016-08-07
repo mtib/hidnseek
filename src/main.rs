@@ -4,18 +4,33 @@ pub mod server;
 use client::Client;
 use server::Server;
 
+use std::thread;
+use std::time;
 use std::env;
 
 fn main() {
-    match env::args().nth(1).unwrap().as_str() {
+    let mut argiter = env::args();
+    match argiter.nth(1).unwrap().as_str() {
         "s" => {
             let mut s = Server::new();
             s.start();
         },
         "c" => {
-            let mut c = Client::new();
-            c.connect();
-            c.control_loop();
+            let (mut client, handler) = match argiter.next() {
+                Some(addr) => {
+                    println!("{:?}",addr);
+                    (Client::new(String::from(addr)), None)
+                }
+                None => {
+                    (Client::new(String::from("localhost")), Some(thread::spawn(move || Server::new().start())))
+                }
+            };
+            thread::sleep(time::Duration::new(1,0));
+            client.connect();
+            client.control_loop();
+            if let Some(t) = handler {
+                t.join().expect("weird thread error");
+            }
         },
         o => println!("use s or c, not: {:?}", o),
     }

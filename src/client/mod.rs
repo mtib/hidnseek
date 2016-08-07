@@ -4,16 +4,17 @@ use std::io::Write;
 
 const PORT: u16 = 3388;
 
-pub struct Client<'a> {
-    saddr: &'a str,
+pub struct Client {
+    saddr: String,
     upstream: Option<UdpSocket>,
 }
 
-impl<'a> Client<'a> {
-    pub fn new() -> Self {
-        Client{saddr: "31.19.191.80", upstream: None}
+impl Client {
+    pub fn new(saddr: String) -> Self {
+        Client{saddr: saddr, upstream: None}
     }
     pub fn connect(&mut self) {
+        println!("connecting to server");
         let upstream = UdpSocket::bind(("0.0.0.0", PORT))
             .expect("failed to create local Socket!");
         self.upstream = Some(upstream);
@@ -29,7 +30,7 @@ impl<'a> Client<'a> {
     }
     fn send_msg<'b>(&self, msg: &'b str) -> Result<usize, String> {
         if let Some(ref upstream) = self.upstream {
-            match upstream.send_to(msg.as_bytes(), (self.saddr, ::server::PORT)) {
+            match upstream.send_to(msg.as_bytes(), (&*self.saddr, ::server::PORT)) {
                 Err(e) => Err(format!("{:?}", e)),
                 Ok(c) => Ok(c)
             }
@@ -60,6 +61,10 @@ impl<'a> Client<'a> {
             match sin.read_line(&mut msg) {
                 Ok(c) => println!("Debug: read {:?} bytes", c),
                 _ => println!("Debug: error reading input")
+            }
+            match &msg[4..] {
+                "quit" => break,
+                _ => {}
             }
             match self.send_msg(&msg[..msg.len()-1]) {
                 Ok(c) => println!("Debug: send {:?} bytes", c),

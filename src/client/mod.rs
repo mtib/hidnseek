@@ -11,29 +11,31 @@ pub struct Client<'a> {
 
 impl<'a> Client<'a> {
     pub fn new() -> Self {
-        Client{saddr: r"127.0.0.1", upstream: None}
+        Client{saddr: "31.19.191.80", upstream: None}
     }
     pub fn connect(&mut self) {
-        let upstream = UdpSocket::bind(("127.0.0.1", PORT))
-            .expect("Failed to connect to Socket!");
+        let upstream = UdpSocket::bind(("0.0.0.0", PORT))
+            .expect("failed to create local Socket!");
         self.upstream = Some(upstream);
 
         let buf = r"200 user login";
-        self.send_msg(buf).expect("Couldn't send to");
+        self.send_msg(buf)
+            .expect("failed sending data");
 
         if let Ok((buf, _)) = self.recv_msg() {
             let (start, end) = Client::trim(&buf);
             println!("recv: {:?}", String::from_utf8_lossy(&buf[start..end]));
         }
     }
-    fn send_msg<'b>(&self, msg: &'b str) -> Result<usize, &'b str> {
+    fn send_msg<'b>(&self, msg: &'b str) -> Result<usize, String> {
         if let Some(ref upstream) = self.upstream {
+            println!("{:?}",&*format!("{}:{:?}", self.saddr, ::server::PORT));
             match upstream.send_to(msg.as_bytes(), (self.saddr, ::server::PORT)) {
-                Err(_) => Err("IO Error while sending data"),
+                Err(e) => Err(format!("{:?}", e)),
                 Ok(c) => Ok(c)
             }
         } else {
-            Err("Socket not initialized")
+            Err(String::from("Socket not initialized"))
         }
     }
     fn recv_msg(&self) -> Result<([u8; ::server::RECV_SIZE], usize), usize> {
@@ -89,6 +91,7 @@ impl<'a> Client<'a> {
                 end = k;
             }
         }
+        assert!(start < end, "error inside trim function");
         (start, end+1)
     }
 }

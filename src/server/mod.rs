@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use std::net::UdpSocket;
 
-const ADDR: &'static str = r"127.0.0.1";
+const ADDR: &'static str = "0.0.0.0";
 pub const PORT: u16 = 3377;
 pub const RECV_SIZE: usize = 256;
 pub const DEFAULT_MAX_PLAYERS: usize = 8;

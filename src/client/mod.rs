@@ -53,7 +53,7 @@ impl Client {
                 Ok(c) => Ok(c)
             }
         } else {
-            Err(String::from("Socket not initialized"))
+            Err("Socket not initialized".to_owned())
         }
     }
     fn recv_msg(&self) -> Result<([u8; ::server::RECV_SIZE], usize), usize> {
@@ -75,14 +75,13 @@ impl Client {
         'input: loop {
             print!(" > ");
             io::stdout().flush().expect("Could not flush output");
-            let mut msg: String = String::from("800 ");
+            let mut msg: String = "800 ".to_owned();
             match sin.read_line(&mut msg) {
                 Ok(c) => self.debug_print(format!("Debug: read {:?} bytes", c)),
                 _ => self.debug_print(format!("Debug: error reading input"))
             }
-            match &msg[4..&msg.len()-1] {
-                "quit" => break,
-                _ => {}
+            if let "quit\n" = &msg[4..] {
+                break;
             }
             let whitespace_only = msg.clone().chars().skip(3).all(|x| match x {
                 '\n'|'\t'|'\r'|' ' => true,

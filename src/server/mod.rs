@@ -35,7 +35,7 @@ impl Server {
         Server{
             max_players: DEFAULT_MAX_PLAYERS,
             cur_players: 0,
-            name: String::from("Default Server Name"),
+            name: "Default Server Name".to_owned(),
             width: 4,
             height: 4,
             players: HashMap::new(),

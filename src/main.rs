@@ -23,7 +23,7 @@ fn main() {
                 }
                 None => {
                     (
-                        Client::new(String::from("localhost")),
+                        Client::new("localhost".to_owned()),
                         Some(thread::spawn(move || {
                             let mut s = Server::new();
                             // s.output_delim("[LOCAL_SERVER] ", " [LOCAL_SERVER]");

@@ -1,6 +1,5 @@
 use std::net::UdpSocket;
-use std::io;
-use std::io::Write;
+use std::io::{self, Write};
 
 const PORT: u16 = 3388;
 
@@ -28,7 +27,7 @@ impl Client {
             println!("recv: {:?}", String::from_utf8_lossy(&buf[start..end]));
         }
     }
-    fn send_msg<'b>(&self, msg: &'b str) -> Result<usize, String> {
+    fn send_msg(&self, msg: &str) -> Result<usize, String> {
         if let Some(ref upstream) = self.upstream {
             match upstream.send_to(msg.as_bytes(), (&*self.saddr, ::server::PORT)) {
                 Err(e) => Err(format!("{:?}", e)),

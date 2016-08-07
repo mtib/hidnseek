@@ -18,7 +18,6 @@ fn main() {
         "c" => {
             let (mut client, handler) = match argiter.next() {
                 Some(addr) => {
-                    println!("{:?}",addr);
                     (Client::new(String::from(addr)), None)
                 }
                 None => {

@@ -5,7 +5,6 @@ use std::net::UdpSocket;
 use std::collections::HashMap;
 use ::server::player::Player;
 
-const ADDR: &'static str = "0.0.0.0";
 pub const PORT: u16 = 3377;
 pub const RECV_SIZE: usize = 256;
 pub const DEFAULT_MAX_PLAYERS: usize = 8;
@@ -39,7 +38,7 @@ impl Server {
     }
     pub fn start(&mut self) {
         println!("starting server");
-        let socket = UdpSocket::bind((ADDR, PORT))
+        let socket = UdpSocket::bind(("0.0.0.0", PORT))
             .expect("Cound not create server socket!");
 
         loop {

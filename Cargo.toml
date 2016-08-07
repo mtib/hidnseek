@@ -1,0 +1,6 @@
+[package]
+name = "hidnseek"
+version = "0.1.0"
+authors = ["Markus Becker <mtb@tibyte.net>"]
+
+[dependencies]

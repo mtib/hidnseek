@@ -4,10 +4,12 @@ mod player;
 use std::net::UdpSocket;
 use std::collections::HashMap;
 use ::server::player::Player;
+use ::code;
 
 pub const PORT: u16 = 3377;
 pub const RECV_SIZE: usize = 256;
 pub const DEFAULT_MAX_PLAYERS: usize = 8;
+const DEFAULT_LOCAL_PRINT: bool = true;
 
 pub struct Server {
     max_players: usize,
@@ -15,7 +17,10 @@ pub struct Server {
     name: String,
     width: usize,
     height: usize,
-    players: HashMap<Vec<(String, u16)>, Player>
+    players: HashMap<String, Player>,
+    begin_delimiter: String,
+    end_delimiter: String,
+    cl_output: bool,
 }
 
 /*
@@ -33,7 +38,11 @@ impl Server {
             name: String::from("Default Server Name"),
             width: 4,
             height: 4,
-            players: HashMap::new()
+            players: HashMap::new(),
+            // just visual stuff
+            begin_delimiter: "[SERVER] ".to_owned(),
+            end_delimiter: "".to_owned(),
+            cl_output: DEFAULT_LOCAL_PRINT,
         }
     }
     pub fn start(&mut self) {
@@ -47,14 +56,48 @@ impl Server {
             let (_, src) = socket.recv_from(&mut buf)
                 .expect("Could not speak with outside world!");
             // send a reply to the socket we received data from
-            let code = String::from_utf8_lossy(&buf[..3]);
-            let content = String::from_utf8_lossy(&buf[4..]);
-            println!("[{}]: {}", code, content);
-            //let buf = buf[..];
-            match socket.send_to(&buf, &src){
-                Ok(_) => (),
-                Err(e) => println!("{:?}", e)
+            let (code, content) = match code::split_u8(&buf) {
+                Some((c,d)) => (c,d),
+                None => ("100", "Split Error")
+            };
+            if self.cl_output {
+                println!("{}[{}]: {}{}", self.begin_delimiter, code, content, self.end_delimiter);
+            }
+            let msrc = format!("{}", src).to_owned();
+            match &*code {
+                "200" => {
+                    self.players.entry(msrc).or_insert(Player::new());
+                    let isok = socket.send_to("200 login ok".as_bytes(), &src).is_ok();
+                    if !isok {
+                        println!("{}[{}]: {}{}", self.begin_delimiter, code, "login failed", self.end_delimiter);
+                    }
+                },
+                "201" => {
+                    if self.players.contains_key(&msrc) {
+                        let p = self.players.entry(msrc).or_insert(Player::new());
+                        p.set_name(&*content);
+                    }
+                },
+                "800" => {
+                    match socket.send_to(content.as_bytes(), &src){
+                        Ok(_) => (),
+                        Err(e) => println!("{:?}", e)
+                    }
+                }
+                _ => {
+
+                }
             }
         }
+    }
+    pub fn output_delim(&mut self, beg: &str, end: &str) {
+        self.begin_delimiter = beg.to_owned();
+        self.end_delimiter = end.to_owned();
+    }
+    pub fn disable_output(&mut self) {
+        self.cl_output = false;
+    }
+    pub fn enable_output(&mut self) {
+        self.cl_output = true;
     }
 }

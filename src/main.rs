@@ -1,5 +1,6 @@
 pub mod client;
 pub mod server;
+pub mod code;
 
 use client::Client;
 use server::Server;
@@ -16,20 +17,25 @@ fn main() {
             s.start();
         },
         "c" => {
-            let (mut client, handler) = match argiter.next() {
+            let (mut client, _) = match argiter.next() {
                 Some(addr) => {
                     (Client::new(String::from(addr)), None)
                 }
                 None => {
-                    (Client::new(String::from("localhost")), Some(thread::spawn(move || Server::new().start())))
+                    (
+                        Client::new(String::from("localhost")),
+                        Some(thread::spawn(move || {
+                            let mut s = Server::new();
+                            // s.output_delim("[LOCAL_SERVER] ", " [LOCAL_SERVER]");
+                            s.disable_output();
+                            s.start();
+                        }))
+                    )
                 }
             };
             thread::sleep(time::Duration::new(1,0));
             client.connect();
             client.control_loop();
-            if let Some(t) = handler {
-                t.join().expect("weird thread error");
-            }
         },
         o => println!("use s or c, not: {:?}", o),
     }

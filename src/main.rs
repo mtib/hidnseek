@@ -21,7 +21,7 @@ fn main() {
                     (Client::new(String::from(addr)), None)
                 }
                 None => {
-                    (Client::new(String::from("localhost")), Some(thread::spawn(move || Server::new().start())))
+                    (Client::new("localhost".to_owned()), Some(thread::spawn(move || Server::new().start())))
                 }
             };
             thread::sleep(time::Duration::new(1,0));

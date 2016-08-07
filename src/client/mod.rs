@@ -21,7 +21,6 @@ impl<'a> Client<'a> {
         let buf = r"200 user login";
         self.send_msg(buf).expect("Couldn't send to");
 
-
         if let Ok((buf, _)) = self.recv_msg() {
             let (start, end) = Client::trim(&buf);
             println!("recv: {:?}", String::from_utf8_lossy(&buf[start..end]));

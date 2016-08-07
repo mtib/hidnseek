@@ -1,5 +1,5 @@
-mod client;
-mod server;
+pub mod client;
+pub mod server;
 
 use client::Client;
 use server::Server;
@@ -15,6 +15,7 @@ fn main() {
         "c" => {
             let mut c = Client::new();
             c.connect();
+            c.control_loop();
         },
         o => println!("use s or c, not: {:?}", o),
     }

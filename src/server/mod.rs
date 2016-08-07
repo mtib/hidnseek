@@ -23,16 +23,15 @@ pub struct Server {
     cl_output: bool,
 }
 
-/*
-Server Codes:
-200 login
-400 logout
-800 chat
-*/
+// Server Codes:
+// 200 login
+// 400 logout
+// 800 chat
+//
 
 impl Server {
-    pub fn new() -> Self{
-        Server{
+    pub fn new() -> Self {
+        Server {
             max_players: DEFAULT_MAX_PLAYERS,
             cur_players: 0,
             name: "Default Server Name".to_owned(),
@@ -47,8 +46,7 @@ impl Server {
     }
     pub fn start(&mut self) {
         println!("starting server");
-        let socket = UdpSocket::bind(("0.0.0.0", PORT))
-            .expect("Cound not create server socket!");
+        let socket = UdpSocket::bind(("0.0.0.0", PORT)).expect("Cound not create server socket!");
 
         loop {
             // read from the socket
@@ -57,11 +55,15 @@ impl Server {
                 .expect("Could not speak with outside world!");
             // send a reply to the socket we received data from
             let (code, content) = match code::split_u8(&buf) {
-                Some((c,d)) => (c,d),
-                None => ("100", "Split Error")
+                Some((c, d)) => (c, d),
+                None => ("100", "Split Error"),
             };
             if self.cl_output {
-                println!("{}[{}]: {}{}", self.begin_delimiter, code, content, self.end_delimiter);
+                println!("{}[{}]: {}{}",
+                         self.begin_delimiter,
+                         code,
+                         content,
+                         self.end_delimiter);
             }
             let msrc = format!("{}", src).to_owned();
             match &*code {
@@ -69,24 +71,26 @@ impl Server {
                     self.players.entry(msrc).or_insert(Player::new());
                     let isok = socket.send_to("200 login ok".as_bytes(), &src).is_ok();
                     if !isok {
-                        println!("{}[{}]: {}{}", self.begin_delimiter, code, "login failed", self.end_delimiter);
+                        println!("{}[{}]: {}{}",
+                                 self.begin_delimiter,
+                                 code,
+                                 "login failed",
+                                 self.end_delimiter);
                     }
-                },
+                }
                 "201" => {
                     if self.players.contains_key(&msrc) {
                         let p = self.players.entry(msrc).or_insert(Player::new());
                         p.set_name(&*content);
                     }
-                },
+                }
                 "800" => {
-                    match socket.send_to(content.as_bytes(), &src){
+                    match socket.send_to(content.as_bytes(), &src) {
                         Ok(_) => (),
-                        Err(e) => println!("{:?}", e)
+                        Err(e) => println!("{:?}", e),
                     }
                 }
-                _ => {
-
-                }
+                _ => {}
             }
         }
     }

@@ -15,28 +15,24 @@ fn main() {
         "s" => {
             let mut s = Server::new();
             s.start();
-        },
+        }
         "c" => {
             let (mut client, _) = match argiter.next() {
-                Some(addr) => {
-                    (Client::new(String::from(addr)), None)
-                }
+                Some(addr) => (Client::new(String::from(addr)), None),
                 None => {
-                    (
-                        Client::new("localhost".to_owned()),
-                        Some(thread::spawn(move || {
-                            let mut s = Server::new();
-                            // s.output_delim("[LOCAL_SERVER] ", " [LOCAL_SERVER]");
-                            s.disable_output();
-                            s.start();
-                        }))
-                    )
+                    (Client::new("localhost".to_owned()),
+                     Some(thread::spawn(move || {
+                        let mut s = Server::new();
+                        // s.output_delim("[LOCAL_SERVER] ", " [LOCAL_SERVER]");
+                        s.disable_output();
+                        s.start();
+                    })))
                 }
             };
-            thread::sleep(time::Duration::new(1,0));
+            thread::sleep(time::Duration::new(1, 0));
             client.connect();
             client.control_loop();
-        },
+        }
         o => println!("use s or c, not: {:?}", o),
     }
 }

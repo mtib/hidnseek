@@ -8,9 +8,9 @@ pub fn split_str<'a>(msg: &'a str) -> Option<(&'a str, &'a str)> {
     }
 }
 
-pub fn split_u8<'a>(data: &'a[u8]) -> Option<(&'a str, &'a str)> {
+pub fn split_u8<'a>(data: &'a [u8]) -> Option<(&'a str, &'a str)> {
     match str::from_utf8(data) {
         Ok(s) => split_str(s),
-        Err(_) => None
+        Err(_) => None,
     }
 }

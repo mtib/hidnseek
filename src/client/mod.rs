@@ -15,7 +15,7 @@ pub struct Client {
 
 impl Client {
     pub fn new(saddr: String) -> Self {
-        Client{
+        Client {
             saddr: saddr,
             upstream: None,
             debug_output: DEFAUTL_DEBUG_PRINT,
@@ -23,9 +23,8 @@ impl Client {
     }
     pub fn connect(&mut self) -> bool {
         println!("connecting to server");
-        let upstream = UdpSocket::bind(("0.0.0.0", PORT))
-            .expect("failed to create local Socket!");
-        upstream.set_read_timeout(Some(Duration::new(2,0)))
+        let upstream = UdpSocket::bind(("0.0.0.0", PORT)).expect("failed to create local Socket!");
+        upstream.set_read_timeout(Some(Duration::new(2, 0)))
             .expect("couldn't set socket reat timeout");
         self.upstream = Some(upstream);
 
@@ -50,7 +49,7 @@ impl Client {
         if let Some(ref upstream) = self.upstream {
             match upstream.send_to(msg.as_bytes(), (&*self.saddr, ::server::PORT)) {
                 Err(e) => Err(format!("{:?}", e)),
-                Ok(c) => Ok(c)
+                Ok(c) => Ok(c),
             }
         } else {
             Err("Socket not initialized".to_owned())
@@ -60,10 +59,8 @@ impl Client {
         let mut buf = [0u8; ::server::RECV_SIZE];
         if let Some(ref upstream) = self.upstream {
             match upstream.recv_from(&mut buf) {
-                Ok(c) => {
-                    Ok((buf, c.0))
-                },
-                _ => Err(1)
+                Ok(c) => Ok((buf, c.0)),
+                _ => Err(1),
             }
         } else {
             Err(1)
@@ -78,29 +75,35 @@ impl Client {
             let mut msg: String = "800 ".to_owned();
             match sin.read_line(&mut msg) {
                 Ok(c) => self.debug_print(format!("Debug: read {:?} bytes", c)),
-                _ => self.debug_print(format!("Debug: error reading input"))
+                _ => self.debug_print(format!("Debug: error reading input")),
             }
             if let "quit\n" = &msg[4..] {
                 break;
             }
             let whitespace_only = msg.clone().chars().skip(3).all(|x| match x {
-                '\n'|'\t'|'\r'|' ' => true,
-                _ => false
+                '\n' | '\t' | '\r' | ' ' => true,
+                _ => false,
             });
             if whitespace_only {
                 self.debug_print("Debug: not sending".to_owned());
                 continue 'input;
             }
-            match self.send_msg(&msg[..msg.len()-1]) {
+            match self.send_msg(&msg[..msg.len() - 1]) {
                 Ok(c) => self.debug_print(format!("Debug: send {:?} bytes", c)),
-                Err(s) => {self.debug_print(format!("Debug: {:?}", s)); continue}
+                Err(s) => {
+                    self.debug_print(format!("Debug: {:?}", s));
+                    continue;
+                }
             }
             match self.recv_msg() {
                 Ok((buf, _)) => {
                     let (start, end) = Client::trim(&buf);
                     println!(">>> {}", String::from_utf8_lossy(&buf[start..end]))
-                },
-                Err(c) => {self.debug_print(format!("Debug: failed to receive answer ({})", c)); continue}
+                }
+                Err(c) => {
+                    self.debug_print(format!("Debug: failed to receive answer ({})", c));
+                    continue;
+                }
             }
         }
     }
@@ -120,7 +123,12 @@ impl Client {
             }
         }
         assert!(start <= end, "error inside trim function");
-        (start, if end >= data.len() {data.len()} else {end+1})
+        (start,
+         if end >= data.len() {
+            data.len()
+        } else {
+            end + 1
+        })
 
     }
     fn debug_print(&self, s: String) {
@@ -134,10 +142,10 @@ impl Client {
         io::stdout().flush().unwrap();
         match io::stdin().read_line(&mut username) {
             Ok(_) => {
-                let username = username.chars().take(username.len()-1).collect::<String>();
+                let username = username.chars().take(username.len() - 1).collect::<String>();
                 self.send_msg(&*username).is_ok();
-            },
-            Err(_) => println!("setting your username failed")
+            }
+            Err(_) => println!("setting your username failed"),
         }
     }
     pub fn enable_debug_output(&mut self) {

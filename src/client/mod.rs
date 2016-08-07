@@ -29,7 +29,6 @@ impl<'a> Client<'a> {
     }
     fn send_msg<'b>(&self, msg: &'b str) -> Result<usize, String> {
         if let Some(ref upstream) = self.upstream {
-            println!("{:?}",&*format!("{}:{:?}", self.saddr, ::server::PORT));
             match upstream.send_to(msg.as_bytes(), (self.saddr, ::server::PORT)) {
                 Err(e) => Err(format!("{:?}", e)),
                 Ok(c) => Ok(c)

@@ -22,7 +22,7 @@ impl<'a> Client<'a> {
             let mut buf = [0u8; ::server::RECV_SIZE];
             upstream.recv_from(&mut buf).expect("Couldn't receive from");
             let r = buf.into_iter().filter(|&x| *x != 0).map(|x| *x).collect::<Vec<u8>>();
-            println!("recv: {:?}", String::from_utf8_lossy(&r).into_owned());
+            println!("recv: {:?}", String::from_utf8_lossy(&r));
 
             self.upstream = Some(upstream);
             r

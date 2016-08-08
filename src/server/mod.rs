@@ -11,23 +11,30 @@ pub const RECV_SIZE: usize = 256;
 pub const DEFAULT_MAX_PLAYERS: usize = 8;
 const DEFAULT_LOCAL_PRINT: bool = true;
 
+#[derive(Debug)]
 pub struct Server {
     max_players: usize,
     cur_players: usize,
     name: String,
-    width: usize,
-    height: usize,
-    players: HashMap<String, Player>,
+    config: Configuration,
     begin_delimiter: String,
     end_delimiter: String,
     cl_output: bool,
 }
 
+#[derive(Debug)]
+pub struct Configuration {
+    width: u32,
+    height: u32,
+    players: HashMap<String, Player>,
+}
+
 // Server Codes:
+// 100 split error
 // 200 login
+// 201 username
 // 400 logout
 // 800 chat
-//
 
 impl Server {
     pub fn new() -> Self {
@@ -35,9 +42,11 @@ impl Server {
             max_players: DEFAULT_MAX_PLAYERS,
             cur_players: 0,
             name: "Default Server Name".to_owned(),
-            width: 4,
-            height: 4,
-            players: HashMap::new(),
+            config: Configuration {
+                width: 4,
+                height: 4,
+                players: HashMap::new(),
+            },
             // just visual stuff
             begin_delimiter: "[SERVER] ".to_owned(),
             end_delimiter: "".to_owned(),
@@ -46,7 +55,8 @@ impl Server {
     }
     pub fn start(&mut self) {
         println!("starting server");
-        let socket = UdpSocket::bind(("0.0.0.0", PORT)).expect("Cound not create server socket!");
+        let socket = UdpSocket::bind(("0.0.0.0", PORT))
+            .expect("Could not bind to socket");
 
         loop {
             // read from the socket
@@ -54,7 +64,8 @@ impl Server {
             let (_, src) = socket.recv_from(&mut buf)
                 .expect("Could not speak with outside world!");
             // send a reply to the socket we received data from
-            let (code, content) = match code::split_u8(&buf) {
+            let (begin, end) = code::trim(&buf);
+            let (code, content) = match code::split_u8(&buf[begin..end]) {
                 Some((c, d)) => (c, d),
                 None => ("100", "Split Error"),
             };
@@ -68,7 +79,12 @@ impl Server {
             let msrc = format!("{}", src).to_owned();
             match &*code {
                 "200" => {
-                    self.players.entry(msrc).or_insert(Player::new());
+                    let mut r = Player::new();
+                    unsafe {
+                        let x = &*self;
+                        &r.give_upstream(x as *const Server);
+                    }
+                    self.config.players.entry(msrc).or_insert(r);
                     let isok = socket.send_to("200 login ok".as_bytes(), &src).is_ok();
                     if !isok {
                         println!("{}[{}]: {}{}",
@@ -76,13 +92,19 @@ impl Server {
                                  code,
                                  "login failed",
                                  self.end_delimiter);
+                    } else {
+                        self.cur_players += 1;
                     }
                 }
                 "201" => {
-                    if self.players.contains_key(&msrc) {
-                        let p = self.players.entry(msrc).or_insert(Player::new());
+                    if self.config.players.contains_key(&msrc) {
+                        let p = self.config.players.entry(msrc).or_insert(Player::new());
                         p.set_name(&*content);
                     }
+                }
+                "400" => {
+                    self.config.players.remove(&msrc);
+                    self.cur_players -= 1;
                 }
                 "800" => {
                     match socket.send_to(content.as_bytes(), &src) {
@@ -91,8 +113,15 @@ impl Server {
                     }
                 }
                 _ => {}
+                // end of match
             }
+            // Debug only:
+            for (k, v) in &self.config.players {
+                println!("|- {} -> {}", k, v);
+            }
+            // end of loop
         }
+        // end of start
     }
     pub fn output_delim(&mut self, beg: &str, end: &str) {
         self.begin_delimiter = beg.to_owned();

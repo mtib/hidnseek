@@ -14,3 +14,27 @@ pub fn split_u8<'a>(data: &'a [u8]) -> Option<(&'a str, &'a str)> {
         Err(_) => None,
     }
 }
+
+pub fn trim(data: &[u8]) -> (usize, usize) {
+    let mut start = 0;
+    let mut end = data.len();
+    let mut switch = false;
+    for (k, &v) in data.iter().enumerate() {
+        // println!("{} {} {} {}", k, v, start, end);
+        if v == 0 {
+            if !switch {
+                start = k;
+            }
+        } else {
+            switch = true;
+            end = k;
+        }
+    }
+    assert!(start <= end, "error inside trim function");
+    (start, if end >= data.len() {
+            data.len()
+        } else {
+            end + 1
+        }
+    )
+}

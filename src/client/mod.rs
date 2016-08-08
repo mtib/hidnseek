@@ -23,7 +23,17 @@ impl Client {
     }
     pub fn connect(&mut self) -> bool {
         println!("connecting to server");
-        let upstream = UdpSocket::bind(("0.0.0.0", PORT)).expect("failed to create local Socket!");
+        let upstream = {
+            fn get_socket(c: u16) -> UdpSocket {
+                let u = UdpSocket::bind(("0.0.0.0", PORT+c)).ok();
+                if let Some(s) = u {
+                    s
+                } else {
+                    get_socket(c+1)
+                }
+            }
+            get_socket(0)
+        };
         upstream.set_read_timeout(Some(Duration::new(2, 0)))
             .expect("couldn't set socket reat timeout");
         self.upstream = Some(upstream);
@@ -33,7 +43,7 @@ impl Client {
             .expect("failed sending data");
 
         if let Ok((buf, _)) = self.recv_msg() {
-            let (start, end) = Client::trim(&buf);
+            let (start, end) = code::trim(&buf);
             let (code, content) = code::split_u8(&buf[start..end]).unwrap();
             println!("answer: {}", content);
             if code == "200" {
@@ -74,7 +84,12 @@ impl Client {
             io::stdout().flush().expect("Could not flush output");
             let mut msg: String = "800 ".to_owned();
             match sin.read_line(&mut msg) {
-                Ok(c) => self.debug_print(format!("Debug: read {:?} bytes", c)),
+                Ok(c) => {
+                    if c == 0 {
+                        break 'input;
+                    }
+                    self.debug_print(format!("Debug: read {:?} bytes", c));
+                },
                 _ => self.debug_print(format!("Debug: error reading input")),
             }
             if let "quit\n" = &msg[4..] {
@@ -97,7 +112,7 @@ impl Client {
             }
             match self.recv_msg() {
                 Ok((buf, _)) => {
-                    let (start, end) = Client::trim(&buf);
+                    let (start, end) = code::trim(&buf);
                     println!(">>> {}", String::from_utf8_lossy(&buf[start..end]))
                 }
                 Err(c) => {
@@ -106,30 +121,7 @@ impl Client {
                 }
             }
         }
-    }
-    fn trim(data: &[u8]) -> (usize, usize) {
-        let mut start = 0;
-        let mut end = data.len();
-        let mut switch = false;
-        for (k, &v) in data.iter().enumerate() {
-            // println!("{} {} {} {}", k, v, start, end);
-            if v == 0 {
-                if !switch {
-                    start = k;
-                }
-            } else {
-                switch = true;
-                end = k;
-            }
-        }
-        assert!(start <= end, "error inside trim function");
-        (start,
-         if end >= data.len() {
-            data.len()
-        } else {
-            end + 1
-        })
-
+        self.send_msg("400 logout").unwrap();
     }
     fn debug_print(&self, s: String) {
         if self.debug_output {

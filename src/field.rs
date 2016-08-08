@@ -114,17 +114,17 @@ impl fmt::Debug for Layout {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for ta in &self.tiles {
             for t in ta {
-                write!(f, "{}", t.text_vis().0).unwrap();
+                try!(write!(f, "{}", t.text_vis().0));
             }
-            write!(f, "\n").unwrap();
+            try!(write!(f, "\n"));
             for t in ta {
-                write!(f, "{}", t.text_vis().1).unwrap();
+                try!(write!(f, "{}", t.text_vis().1));
             }
-            write!(f, "\n").unwrap();
+            try!(write!(f, "\n"));
             for t in ta {
-                write!(f, "{}", t.text_vis().2).unwrap();
+                try!(write!(f, "{}", t.text_vis().2));
             }
-            write!(f, "\n").unwrap();
+            try!(write!(f, "\n"));
         }
         write!(f, "")
     }
@@ -137,11 +137,11 @@ impl fmt::Display for Layout {
             unimplemented!();
         }
         for y in 1..vvt.len()-1 {
-            write!(f, "O").unwrap();
+            try!(write!(f, "O"));
             for x in 1..vvt[y].len()-1 {
                 unimplemented!();
             }
-            write!(f, "O").unwrap();
+            try!(write!(f, "O"));
         }
         write!(f, "\n")
     }

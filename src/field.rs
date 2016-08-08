@@ -51,28 +51,28 @@ impl Tile {
     pub fn text_vis(&self) -> (String, String, String) {
         let mut text = (" ".to_owned(), "".to_owned(), " ".to_owned());
         if self.north {
-            text.0.push_str("|");
+            text.0.push('|');
         } else {
-            text.0.push_str(" ");
+            text.0.push(' ');
         }
         if self.east {
-            text.1.push_str("-");
+            text.1.push('-');
         } else {
-            text.1.push_str(" ");
+            text.1.push(' ');
         }
-        text.1.push_str("O");
+        text.1.push('O');
         if self.west {
-            text.1.push_str("-");
+            text.1.push('-');
         } else {
-            text.1.push_str(" ");
+            text.1.push(' ');
         }
         if self.south {
-            text.2.push_str("|");
+            text.2.push('|');
         } else {
-            text.2.push_str(" ");
+            text.2.push(' ');
         }
-        text.2.push_str(" ");
-        text.0.push_str(" ");
+        text.2.push(' ');
+        text.0.push(' ');
         text
     }
 }
@@ -126,7 +126,7 @@ impl fmt::Debug for Layout {
             }
             try!(write!(f, "\n"));
         }
-        write!(f, "")
+        Ok(())
     }
 }
 

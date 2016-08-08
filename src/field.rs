@@ -51,28 +51,28 @@ impl Tile {
     pub fn text_vis(&self) -> (String, String, String) {
         let mut text = (" ".to_owned(), "".to_owned(), " ".to_owned());
         if self.north {
-            &text.0.push_str("|");
+            text.0.push_str("|");
         } else {
-            &text.0.push_str(" ");
+            text.0.push_str(" ");
         }
         if self.east {
-            &text.1.push_str("-");
+            text.1.push_str("-");
         } else {
-            &text.1.push_str(" ");
+            text.1.push_str(" ");
         }
-        &text.1.push_str("O");
+        text.1.push_str("O");
         if self.west {
-            &text.1.push_str("-");
+            text.1.push_str("-");
         } else {
-            &text.1.push_str(" ");
+            text.1.push_str(" ");
         }
         if self.south {
-            &text.2.push_str("|");
+            text.2.push_str("|");
         } else {
-            &text.2.push_str(" ");
+            text.2.push_str(" ");
         }
-        &text.2.push_str(" ");
-        &text.0.push_str(" ");
+        text.2.push_str(" ");
+        text.0.push_str(" ");
         text
     }
 }
@@ -132,13 +132,13 @@ impl fmt::Debug for Layout {
 
 impl fmt::Display for Layout {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let vvt = &self.tiles.iter().map(|x| x.iter().map(|v| v.text_vis()).collect::<Vec<(String, String, String)>>()).collect::<Vec<Vec<(String, String, String)>>>();
+        let vvt = self.tiles.iter().map(|x| x.iter().map(|v| v.text_vis()).collect::<Vec<(String, String, String)>>()).collect::<Vec<Vec<(String, String, String)>>>();
         for x in 0..vvt[0].len() {
             unimplemented!();
         }
-        for y in 1..vvt.len()-1 {
+        for y in vvt.iter().take(vvt.len()-1).skip(1) {
             try!(write!(f, "O"));
-            for x in 1..vvt[y].len()-1 {
+            for x in 1..y.len()-1 {
                 unimplemented!();
             }
             try!(write!(f, "O"));

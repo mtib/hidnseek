@@ -54,6 +54,20 @@ pub struct Configuration {
 // 800 chat
 // 81X ## movement
 
+macro_rules! server_print {
+    ($slf:ident, $fmt:expr) => {
+        println!(concat!("{}", $fmt, "{}"),
+                 $slf.begin_delimiter,
+                 $slf.end_delimiter);
+    };
+    ($slf:ident, $fmt:expr, $($arg:tt)*) => {
+        println!(concat!("{}", $fmt, "{}"),
+                 $slf.begin_delimiter,
+                 $($arg)*,
+                 $slf.end_delimiter);
+    };
+}
+
 // TODO server console
 // TODO changing server name
 impl Server {
@@ -95,11 +109,7 @@ impl Server {
             };
             // debug printing
             if self.cl_output {
-                println!("{}[{}]: {}{}",
-                         self.begin_delimiter,
-                         code,
-                         content,
-                         self.end_delimiter);
+                server_print!(self, "[{}]: {}", code, content);
             }
             // <addr>:<port> used to identify the user
             let msrc = format!("{}", src).to_owned();
@@ -115,11 +125,7 @@ impl Server {
                     self.config.players.entry(msrc).or_insert(r);
                     let isok = socket.send_to(b"200 login ok", &src).is_ok();
                     if !isok {
-                        println!("{}[{}]: {}{}",
-                                 self.begin_delimiter,
-                                 code,
-                                 "login failed",
-                                 self.end_delimiter);
+                        server_print!(self, "[{}]: {}", code, "login failed");
                     } else {
                         self.cur_players += 1;
                     }

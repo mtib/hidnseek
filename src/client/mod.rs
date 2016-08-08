@@ -19,6 +19,20 @@ pub struct Client {
     // debug fields
     debug_output: bool,
 }
+/// Prints to the commandline if self.debug_output is true.
+/// Use {en,dis}able_debug_output() to change.
+macro_rules! debug_print {
+    ($slf:ident, $fmt:expr) => {
+        if $slf.debug_output {
+            println!($fmt);
+        }
+    };
+    ($slf:ident, $fmt:expr, $($arg:tt)*) => {
+        if $slf.debug_output {
+            println!($fmt, $($arg)*);
+        }
+    };
+}
 
 impl Client {
     /// saddr: the udp address of the server
@@ -123,9 +137,9 @@ impl Client {
                         // purposes.
                         break 'input;
                     }
-                    self.debug_print(format!("Debug: read {:?} bytes", c));
-                },
-                _ => self.debug_print("Debug: error reading input".to_owned()),
+                    debug_print!(self, "Debug: read {:?} bytes", c);
+                }
+                _ => debug_print!(self, "Debug: error reading input")
             }
             // quit also tries to logout, later on
             if let "quit\n" = &msg[4..] {
@@ -137,15 +151,15 @@ impl Client {
                 _ => false,
             });
             if whitespace_only {
-                self.debug_print("Debug: not sending".to_owned());
+                debug_print!(self, "Debug: not sending");
                 continue 'input;
             }
             // sending "800 " + what the user has entered to the server
             // without the final \n, but with all other escaped chars.
             match self.send_msg(&msg[..msg.len() - 1]) {
-                Ok(c) => self.debug_print(format!("Debug: send {:?} bytes", c)),
+                Ok(c) => debug_print!(self, "Debug: send {:?} bytes", c),
                 Err(s) => {
-                    self.debug_print(format!("Debug: {:?}", s));
+                    debug_print!(self, "Debug: {:?}", s);
                     continue;
                 }
             }
@@ -161,7 +175,7 @@ impl Client {
                     // instead of doing this we could send the message
                     // again, awaiting another ACK, after n tries the
                     // client should not longer try to send data.
-                    self.debug_print(format!("Debug: failed to receive answer ({})", c));
+                    debug_print!(self, "Debug: failed to receive answer ({})", c);
                     continue;
                 }
             }
@@ -170,13 +184,6 @@ impl Client {
         // from it's Configuration.players HashMap.
         // TODO also send on Interrupt or SIGKILL if possible
         self.send_msg("400 logout").unwrap();
-    }
-    /// Prints to the commandline if self.debug_output is true.
-    /// Use {en,dis}able_debug_output() to change.
-    fn debug_print(&self, s: String) {
-        if self.debug_output {
-            println!("{}", s);
-        }
     }
     /// This function asks for the username and tries to send it.
     /// The client has to be connected for this to work.
@@ -192,11 +199,11 @@ impl Client {
             Err(_) => println!("setting your username failed"),
         }
     }
-    /// Enables output using the function debug_print.
+    /// Enables output using debug_print!.
     pub fn enable_debug_output(&mut self) {
         self.debug_output = true;
     }
-    /// Disables output using the function debug_print.
+    /// Disables output using debug_print!.
     pub fn disable_debug_output(&mut self) {
         self.debug_output = false;
     }

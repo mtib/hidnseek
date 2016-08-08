@@ -110,10 +110,10 @@ impl Server {
                     let mut r = Player::new();
                     unsafe {
                         let x = &*self;
-                        &r.give_upstream(x as *const Server);
+                        r.give_upstream(x as *const Server);
                     }
                     self.config.players.entry(msrc).or_insert(r);
-                    let isok = socket.send_to("200 login ok".as_bytes(), &src).is_ok();
+                    let isok = socket.send_to(b"200 login ok", &src).is_ok();
                     if !isok {
                         println!("{}[{}]: {}{}",
                                  self.begin_delimiter,
@@ -127,7 +127,7 @@ impl Server {
                 // player set their username (201 <username>)
                 "201" => {
                     if self.config.players.contains_key(&msrc) {
-                        let p = self.config.players.entry(msrc).or_insert(Player::new());
+                        let p = self.config.players.entry(msrc).or_insert_with(Player::new);
                         p.set_name(&*content);
                     }
                 }

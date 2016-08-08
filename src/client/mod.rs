@@ -10,7 +10,7 @@ const DEFAULT_DEBUG_PRINT: bool = true;
 // TODO writing a log / error file
 
 /// Local client, run in the terminal, with which the user interacts.
-/// Not to confuse with ::server::Player , which is the Servers modeling
+/// Not to confuse with `::server::Player` , which is the Servers modeling
 /// of the clients and their position.
 /// The clients do not know of each other.
 pub struct Client {
@@ -125,7 +125,7 @@ impl Client {
                     }
                     self.debug_print(format!("Debug: read {:?} bytes", c));
                 },
-                _ => self.debug_print(format!("Debug: error reading input")),
+                _ => self.debug_print("Debug: error reading input".to_owned()),
             }
             // quit also tries to logout, later on
             if let "quit\n" = &msg[4..] {

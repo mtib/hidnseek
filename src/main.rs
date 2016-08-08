@@ -14,7 +14,7 @@ use std::env;
 
 fn main() {
     let mut argiter = env::args();
-    match argiter.nth(1).unwrap().as_str() {
+    match argiter.nth(1).unwrap_or_default().as_str() {
         "s" => {
             // just start the server
             let mut s = Server::new();
@@ -28,7 +28,7 @@ fn main() {
                 // do not connect to an online server, create local one
                 None => {
                     // connect client to localhost:3377 (server)
-                    let s = (Client::new("localhost".to_owned()),
+                    let s = (Client::new("127.0.0.1".to_owned()),
                     // start local server
                     Some(thread::spawn(move || {
                         let mut s = Server::new();

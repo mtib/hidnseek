@@ -154,9 +154,9 @@ impl Server {
                 // end of matching <code>
             }
             // Debug only:
-            for (k, v) in &self.config.players {
+            /*for (k, v) in &self.config.players {
                 println!("|- {} -> {}", k, v);
-            }
+            }*/
             // end of loop
         }
         // end of start

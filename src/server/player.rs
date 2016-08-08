@@ -2,6 +2,9 @@
 use std::fmt;
 use ::server;
 
+/// The servers view of the clients.
+/// The clients only know about other clients via the player
+/// interface if the server tells them.
 pub struct Player {
     name: String,
     pos_x: u32,

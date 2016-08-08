@@ -26,7 +26,7 @@ pub fn trim(data: &[u8]) -> (usize, usize) {
         // println!("{} {} {} {}", k, v, start, end);
         if v == 0 {
             if !switch {
-                start = k;
+                start = k + 1;
             }
         } else {
             switch = true;
@@ -76,6 +76,24 @@ mod tests {
             } else {
                 panic!("Failed testing {:?}, expected {}:{}", t, code, content);
             }
+        }
+    }
+
+    #[test]
+    fn test_trim() {
+        let test_arrs = [
+            ([0,0,20,0,0], (2,3)),
+            ([0,10,20,0,0], (1,3)),
+            ([10,0,20,0,0], (0,3)),
+            ([0,0,20,0,0], (2,3)),
+            ([0,0,20,0,10], (2,5)),
+            ([0,0,20,0,0], (2,3)),
+            ([1,1,1,1,1], (0,5)),
+            ([0,0,1,1,1], (2,5)),
+        ];
+        let mut test_iter = test_arrs.iter();
+        while let Some(&(a, r)) = test_iter.next() {
+            assert_eq!(trim(&a), r);
         }
     }
 }

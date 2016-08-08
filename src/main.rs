@@ -1,6 +1,7 @@
 pub mod client;
 pub mod server;
 pub mod code;
+pub mod field;
 
 use client::Client;
 use server::Server;

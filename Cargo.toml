@@ -5,3 +5,8 @@ authors = ["Markus Becker <mtb@tibyte.net>", "LFalch <lucas@wasd.dk>"]
 
 [dependencies]
 rand = "0.3.0"
+
+[features]
+default = []
+debug = ["debug_output"]
+debug_output = []

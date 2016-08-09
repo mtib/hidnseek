@@ -35,10 +35,13 @@ fn main() {
                         let mut s = Server::new();
                         // make server output more obvious:
                         // s.output_delim("[LOCAL_SERVER] "," [LOCAL_SERVER]");
-                        s.disable_output();
+                        if !cfg!(feature = "debug_output") {
+                            s.disable_output();
+                        }
                         s.start();
                     })));
                     // the server has to be up and running before the client
+                    // TODO use callback or channel to start client, not wait
                     thread::sleep(time::Duration::new(1, 0));
                     s
                 }

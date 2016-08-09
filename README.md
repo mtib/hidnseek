@@ -13,6 +13,15 @@ cargo run c
 cargo run c <ipaddr>
 ```
 
+You can also provide additional feature flags:
+```bash
+cargo run --features "debug" c
+```
+
+| Feature  | Desciption                                |
+| :-       | :-                                        |
+| debug    | enables server output of the local server |
+
 ## Contribution
 Feel free to contribute to the game. Try to follow the design guide and comment
 your code.

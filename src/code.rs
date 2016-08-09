@@ -1,6 +1,14 @@
 use std::str;
 
-/// Split a message into <code> and <content>
+/// Split a message as a string slice into `(code: &str, content: &str)`
+///
+/// # Example
+/// ```rust
+/// # fn split_str(s: &str) -> Option<(&str,&str)> {Some(("800", "Message"))};
+/// let response = "800 Message";
+/// let split =  split_str(response).unwrap();
+/// assert_eq!(split, ("800", "Message"));
+/// ```
 pub fn split_str(msg: &str) -> Option<(&str, &str)> {
     if msg.len() > 4 {
         Some((&msg[..3], &msg[4..]))
@@ -9,7 +17,9 @@ pub fn split_str(msg: &str) -> Option<(&str, &str)> {
     }
 }
 
-/// Split a message into <code> and <content>
+/// Split a message as a byte slice into `(code: &str, content: &str)`
+///
+/// this is done by casting into a utf8 string slice and calling `split_str()``
 pub fn split_u8(data: &[u8]) -> Option<(&str, &str)> {
     match str::from_utf8(data) {
         Ok(s) => split_str(s),

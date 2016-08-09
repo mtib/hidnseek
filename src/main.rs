@@ -1,3 +1,5 @@
+//! The file [code.rs](code/index.html) serves as a library module for this crate.
+
 pub mod client;
 pub mod server;
 pub mod code;
